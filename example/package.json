@@ -1,0 +1,13 @@
+{
+  "name": "newx-example",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "author": "Asuka109",
+  "scripts": {
+    "start": "newx"
+  },
+  "dependencies": {
+    "newx": "../"
+  }
+}
