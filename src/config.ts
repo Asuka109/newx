@@ -1,33 +1,38 @@
 import postHtml from "posthtml"
-import { statSync } from 'fs'
+
+export type RecursivePartial<T> = {
+  [P in keyof T]?: RecursivePartial<T[P]>
+}
+
+export type PartialExcept<T, K extends keyof T> = RecursivePartial<T> & Pick<T, K>
 
 export interface Config {
-  input?: {
+  input: {
     /** The directory to page files. */
-    pages?: string
+    pages: string
     /** The directory to component files. */
-    components?: string
+    components: string
     /** The directory to layout files. */
-    layouts?: string
+    layouts: string
   }
-  output?: {
+  output: {
     /** The directory to output files. */
-    dir?: string
+    dir: string
     /** Clean output directory before building. */
-    clean?: boolean
+    clean: boolean
     /** Specify the output format. */
-    format?: 'minimize' | 'beautify' | 'original'
-  },
-  devServer?: {
+    format: 'minimize' | 'beautify' | 'original'
+  }
+  devServer: {
     /** Server host. */
-    host?: string,
+    host: string,
     /** Server port. */
-    port?: string | number
+    port: string | number
     /** Open the dev server in your browser when building succeeded. */
-    open?: boolean
+    open: boolean
   }
   /** Configure options for postHtml. */
-  postHtmlPlugins?: postHtml.Plugin<unknown>[]
+  postHtmlPlugins: postHtml.Plugin<unknown>[]
 }
 
 export const defaultConfig = () => ({
@@ -48,19 +53,3 @@ export const defaultConfig = () => ({
   },
   postHtmlPlugins: []
 } as Config)
-
-/**
- * Newx will search newx.config.{ts,js} .newxrc.json
- * or newx property in package.json from your project. 
- */
-export const readConfig = () => {
-  const configContents: Config[] = [];
-  ['newx.config.ts', 'newx.config.js', '.newxrc.json', '.newxrc'].forEach(filename => {
-    try {
-      if (statSync('newx.config.ts').isFile()) {
-        configContents.push(require('./newx.config.ts'))
-      }
-    } catch (e) {}
-  })
-  return Object.assign(defaultConfig(), ...configContents)
-}
