@@ -3,6 +3,7 @@ import { promisify } from "util"
 import postHtml from 'posthtml'
 import postHtmlExtend from 'posthtml-extend'
 import postHtmlParser from 'posthtml-parser'
+import postHtmlRender from "posthtml-render"
 import postHtmlModules from 'posthtml-modules'
 import beautify from 'js-beautify'
 import path from "path"

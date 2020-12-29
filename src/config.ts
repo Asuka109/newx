@@ -1,6 +1,9 @@
 import { statSync } from "fs"
 import postHtml from "posthtml"
 import merge from 'deepmerge'
+import beautify from 'js-beautify'
+import postHtmlParser from 'posthtml-parser'
+import postHtmlRender from "posthtml-render"
 
 export type RecursivePartial<T> = {
   [P in keyof T]?: RecursivePartial<T[P]>
@@ -35,8 +38,14 @@ export interface Config {
     /** Observed path whose change triggers recompilation. */
     watch: string | string[]
   }
-  /** Configure options for postHtml. */
-  postHtmlPlugins: postHtml.Plugin<unknown>[]
+  /** Plugins for postHtml. */
+  plugins: postHtml.Plugin<unknown>[]
+  /** Options for js-beautify. */
+  jsBeautify: Partial<beautify.JSBeautifyOptions> 
+  /** Options for posthtml-parser. */
+  parser: Partial<postHtmlParser.Options>
+  /** Options for posthtml-render. */
+  render: Partial<postHtmlRender.Options>
 }
 
 export type ConfigSerializableField = 'input'|'output'|'devServer'
@@ -58,7 +67,10 @@ export const defaultConfig = () => ({
     open: true,
     watch: []
   },
-  postHtmlPlugins: []
+  plugins: [],
+  jsBeautify: {},
+  parser: {},
+  render: {}
 } as Config)
 
 export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
