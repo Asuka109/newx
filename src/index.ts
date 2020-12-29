@@ -21,15 +21,14 @@ interface ProcessOptions {
   parser?: postHtmlParser.Options
 }
 
-const postHtmlNestedModules: typeof postHtmlModules = (
-  { plugins=[], ...options } = {}
-) => postHtmlModules({
-  plugins: [
-    (tree: postHtml.Node) => postHtmlNestedModules({ plugins, ...options })(tree),
-    ...plugins instanceof Array ? plugins : [plugins]
-  ],
-  ...options
-})
+const postHtmlNestedModules: typeof postHtmlModules = ({ plugins=[], ...options} = {}) => {
+  const hookedPostHtmlModules = (tree: postHtml.Node) => postHtmlNestedModules({ plugins, ...options })(tree)
+  const _plugins = plugins instanceof Array ? plugins : [plugins]
+  return postHtmlModules({
+    plugins: [hookedPostHtmlModules, ..._plugins],
+    ...options
+  })
+}
 
 export default class Newx {
   options: NewxOptions
