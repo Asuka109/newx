@@ -2,7 +2,7 @@ import { cac } from 'cac'
 import fs from 'fs'
 import glob from "glob"
 import path from 'path'
-import { CliConfig, Config, mergeCliConfig, readConfig } from './config'
+import { CliArgs, Config, mergeCliArgs, readConfig } from './config'
 import Newx from './index'
 import rimraf from "rimraf";
 
@@ -10,8 +10,8 @@ const cli = cac('newx')
 
 const removeDuplicate = <T = any>(arr: T[]) => Array.from(new Set(arr))
 
-const cliAction = (cliOptions: CliConfig, watch: boolean) => {
-  const options = mergeCliConfig(readConfig(), cliOptions)
+const cliAction = (cliOptions: CliArgs, watch: boolean) => {
+  const options = mergeCliArgs(readConfig(), cliOptions)
   const getOutputPagePath = (filename: string) => {
     const relativePath = path.relative(pages, filename)
     return path.resolve(`${options.output.dir}/${relativePath}`)
@@ -21,21 +21,20 @@ const cliAction = (cliOptions: CliConfig, watch: boolean) => {
     devServer: { watch: _watch }
   } = options
   const newx = new Newx({ ...options.input, format: options.output.format })
-
   if (options.output.clean)
     rimraf.sync(options.output.dir)
 
+  // Build all pages.
   glob.sync(`${pages}/**/*.html`).forEach(inputFile => {
     const outputFile = getOutputPagePath(inputFile)
     newx.processFile(inputFile, outputFile)
   })
-
   if (!watch) return
-  
+
+  // Watch dependent files and recompile them when they are modified.
   const watchFiles = removeDuplicate([
     components, layouts, ..._watch instanceof Array ? _watch : [_watch]
   ])
-
   watchFiles.forEach(path => {
     fs.watch(path, (event, filename) => {
       newx.processFile(filename, getOutputPagePath(filename))
@@ -44,13 +43,13 @@ const cliAction = (cliOptions: CliConfig, watch: boolean) => {
 }
 
 cli.command('build', 'Build files.')
-  .action((cliOptions: CliConfig) => cliAction(cliOptions, false))
+  .action((cliOptions: CliArgs) => cliAction(cliOptions, false))
 
 cli.command('dev', 'Watch files and running dev-server.')
   .option('-h, --host <host>', 'Server host.')
   .option('-p, --port <port>', 'Server port.')
   .option('-O, --open', 'Open the dev server in your browser when building succeeded.')
-  .action((cliOptions: CliConfig) => cliAction(cliOptions, true))
+  .action((cliOptions: CliArgs) => cliAction(cliOptions, true))
 
 cli
   .option('--pages <path>', 'The directory to page files.')

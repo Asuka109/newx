@@ -86,7 +86,7 @@ export const readConfig = (): Config => {
   return mergeConfig(...configContents)
 }
 
-export type CliConfig = PickAndFlatten<Config, ConfigSerializableField>
+export type CliArgs = PickAndFlatten<Config, ConfigSerializableField>
 
 const deleteEmptyProp = (obj: any) => {
   for (const propName in obj)
@@ -96,10 +96,10 @@ const deleteEmptyProp = (obj: any) => {
       deleteEmptyProp(obj[propName])
 }
 
-export const mergeCliConfig = (config: Config, cliConfig: CliConfig) => {
+export const mergeCliArgs = (config: Config, CliArgs: CliArgs) => {
   const {
     pages, components, layouts, dir, clean, format, host, port, open, watch
-  } = cliConfig
+  } = CliArgs
   const _config: PartialExcept<Config, ConfigSerializableField> = {
     input: { pages, components, layouts },
     output: { dir, clean, format },
