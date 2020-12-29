@@ -42,9 +42,9 @@ export default class Newx {
     ])
   }
 
-  process(html: string, options?: ProcessOptions): string {
+  async process(html: string, options?: ProcessOptions) {
     const parser = (html: string) => postHtmlParser(html, options?.parser)
-    const result = this.processor.process(html, { parser, sync: true }) as unknown as postHtml.Result<unknown>
+    const result = await this.processor.process(html, { parser })
     return result.html
   }
 
@@ -53,7 +53,7 @@ export default class Newx {
       const outputDir = path.dirname(outputFile)
       fs.mkdirSync(outputDir, { recursive: true })
       const inputContent = await fs.promises.readFile(inputFile, { encoding: 'utf-8' })
-      let outputContent = this.process(inputContent, options)
+      let outputContent = await this.process(inputContent, options)
       if (this.options.format)
         outputContent = beautify.html(outputContent, { preserve_newlines: false })
         await fs.promises.writeFile(outputFile, outputContent)
