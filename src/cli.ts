@@ -1,56 +1,65 @@
 import { cac } from 'cac'
-import { statSync } from 'fs'
-import merge from 'deepmerge'
-import { Config, defaultConfig, RecursivePartial } from './config'
+import fs from 'fs'
+import glob from "glob"
+import path from 'path'
+import { CliConfig, Config, mergeCliConfig, readConfig } from './config'
 import Newx from './index'
-
-/**
- * Newx will search newx.config.{ts,js} .newxrc.json
- * or newx property in package.json from your project. 
- */
-export const readConfig = (): Config => {
-  const configContents: RecursivePartial<Config>[] = [defaultConfig()];
-  ['newx.config.ts', 'newx.config.js', '.newxrc.json', '.newxrc'].forEach(filename => {
-    try {
-      if (statSync(filename).isFile()) {
-        configContents.push(require(`${process.cwd()}/${filename}`))
-      }
-    } catch (e) {}
-  })
-  return merge.all(configContents) as Config
-}
-
-/**
- * Mix default config, file defined config and argument.
- */
-const mixConfig = (config: RecursivePartial<Config>): Config => Object.assign(readConfig(), config)
+import rimraf from "rimraf";
 
 const cli = cac('newx')
 
-cli.command('build', 'Build files.')
-  .action((options: Config) => {
-    const _options = mixConfig(options)
-    console.log('_options: ', _options)
-    const newx = new Newx(_options.input)
+const removeDuplicate = <T = any>(arr: T[]) => Array.from(new Set(arr))
+
+const cliAction = (cliOptions: CliConfig, watch: boolean) => {
+  const options = mergeCliConfig(readConfig(), cliOptions)
+  const getOutputPagePath = (filename: string) => {
+    const relativePath = path.relative(pages, filename)
+    return path.resolve(`${options.output.dir}/${relativePath}`)
+  }
+  const {
+    input: { components, layouts, pages },
+    devServer: { watch: _watch }
+  } = options
+  const newx = new Newx({ ...options.input, format: options.output.format })
+
+  if (options.output.clean)
+    rimraf.sync(options.output.dir)
+
+  glob.sync(`${pages}/**/*.html`).forEach(inputFile => {
+    const outputFile = getOutputPagePath(inputFile)
+    newx.processFile(inputFile, outputFile)
   })
+
+  if (!watch) return
+  
+  const watchFiles = removeDuplicate([
+    components, layouts, ..._watch instanceof Array ? _watch : [_watch]
+  ])
+
+  watchFiles.forEach(path => {
+    fs.watch(path, (event, filename) => {
+      newx.processFile(filename, getOutputPagePath(filename))
+    })
+  })
+}
+
+cli.command('build', 'Build files.')
+  .action((cliOptions: CliConfig) => cliAction(cliOptions, false))
 
 cli.command('dev', 'Watch files and running dev-server.')
   .option('-h, --host <host>', 'Server host.')
   .option('-p, --port <port>', 'Server port.')
   .option('-O, --open', 'Open the dev server in your browser when building succeeded.')
-  .action((options: Config) => {
-    const _options = mixConfig(options)
-    console.log('_options: ', _options)
-    const newx = new Newx(_options.input)
-  })
+  .action((cliOptions: CliConfig) => cliAction(cliOptions, true))
 
 cli
   .option('--pages <path>', 'The directory to page files.')
   .option('--components <path>', 'The directory to page files.')
   .option('--layouts <path>', 'The directory to layout files.')
   .option('-o, --dir <path>', 'The directory to output files.')
-  .option('-c, --clean', 'Disable clean output directory before building.')
-  .option('-f, --format <type>', 'Specify the output format.')
+  .option('-c, --clean', 'Clean output directory before building.')
+  .option('-f, --format', 'Specify the output format.')
+  .option('-w, --watch <path>', 'Observed path whose change triggers recompilation.')
 
 cli.help()
 

@@ -5,9 +5,11 @@
   "license": "MIT",
   "author": "Asuka109",
   "scripts": {
-    "start": "newx"
+    "build": "node ../dist/cli.js build",
+    "dev": "node ../dist/cli.js dev"
   },
   "dependencies": {
     "newx": "../"
-  }
+  },
+  "devDependencies": {}
 }
