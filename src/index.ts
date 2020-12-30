@@ -1,11 +1,13 @@
-import fs from "fs"
+import fs from 'fs'
+import path from 'path'
 import postHtml from 'posthtml'
 import postHtmlExtend from 'posthtml-extend'
 import postHtmlParser from 'posthtml-parser'
-import postHtmlRender from "posthtml-render"
+import postHtmlRender from 'posthtml-render'
 import postHtmlModules from 'posthtml-modules'
 import beautify from 'js-beautify'
-import path from "path"
+import chalk from 'chalk'
+import logger from './logger'
 
 interface NewxOptions {
     /** The directory to component files. */
@@ -62,11 +64,13 @@ export default class Newx {
       fs.mkdirSync(outputDir, { recursive: true })
       const inputContent = await fs.promises.readFile(inputFile, { encoding: 'utf-8' })
       let outputContent = await this.process(inputContent)
-      if (this.options.format)
+      if (this.options.format) {
         outputContent = beautify.html(outputContent, { preserve_newlines: false })
-        await fs.promises.writeFile(outputFile, outputContent)
+      }
+      await fs.promises.writeFile(outputFile, outputContent)
     } catch (err) {
-      console.log(err)
+      logger.error(chalk`Error while building the file {green '${inputFile}'}.`)
+      logger.error(err)
     }
   }
 }

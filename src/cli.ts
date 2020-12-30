@@ -1,28 +1,22 @@
-import { cac } from 'cac'
 import fs from 'fs'
-import glob from "glob"
+import glob from 'glob'
 import path from 'path'
-import { CliArgs, mergeCliArgs, readConfig } from './config'
-import Newx from './index'
-import rimraf from "rimraf";
-import logger from './logger'
+import { cac } from 'cac'
+import rimraf from 'rimraf'
 import chalk from 'chalk'
 import debounce from 'lodash/debounce'
+import Newx from './index'
+import logger from './logger'
+import { removeDuplicate } from './utils'
+import { CliArgs, mergeCliArgs, readConfig } from './config'
 
 const cli = cac('newx')
 
-const removeDuplicate = <T = any>(arr: T[]) => Array.from(new Set(arr))
-
 const cliAction = (cliOptions: CliArgs, watch: boolean) => {
   const options = mergeCliArgs(readConfig(), cliOptions)
-  console.log('options: ', options);
   logger.setOptions({ debug: options.debug })
-  const {
-    input: { components, layouts, pages },
-    devServer: { watch: _watch }
-  } = options
   const getOutputPagePath = (filename: string) => {
-    const relativePath = path.relative(pages, filename)
+    const relativePath = path.relative(options.input.pages, filename)
     return path.resolve(`${options.output.dir}/${relativePath}`)
   }
   const newx = new Newx({
@@ -34,7 +28,7 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
   })
   const process = (inputFile: string, outputFile: string) => {
     newx.processFile(inputFile, outputFile)
-    logger.log(chalk.cyan('Wrote'), path.relative(pages, inputFile))
+    logger.log(chalk.cyan('Wrote'), path.relative(options.input.pages, inputFile))
   }
   const processAll = () => {
     pageFiles.forEach(inputFile => {
@@ -46,13 +40,18 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
     rimraf.sync(options.output.dir)
 
   // Build all pages.
-  const pageFiles = glob.sync(`${pages}/**/*.html`).map(filename => path.resolve(filename))
+  const pageFiles = glob.sync(`${options.input.pages}/**/*.html`).map(filename => path.resolve(filename))
   processAll()
   if (!watch) return
 
   // Watch dependent files and recompile them when they are changed.
   const watchFiles = removeDuplicate([
-    pages, components, layouts, ..._watch instanceof Array ? _watch : [_watch]
+    options.input.pages,
+    options.input.components,
+    options.input.layouts,
+    ...options.devServer.watch instanceof Array
+      ? options.devServer.watch
+      : [options.devServer.watch]
   ])
   watchFiles.forEach(watchFile => {
     fs.watch(watchFile, debounce((event, filename) => {

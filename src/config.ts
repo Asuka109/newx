@@ -1,15 +1,10 @@
-import { statSync } from "fs"
-import postHtml from "posthtml"
+import { statSync } from 'fs'
+import postHtml from 'posthtml'
 import merge from 'deepmerge'
 import beautify from 'js-beautify'
 import postHtmlParser from 'posthtml-parser'
-import postHtmlRender from "posthtml-render"
-
-export type RecursivePartial<T> = {
-  [P in keyof T]?: RecursivePartial<T[P]>
-}
-
-export type PartialExcept<T, K extends keyof T> = RecursivePartial<T> & Pick<T, K>
+import postHtmlRender from 'posthtml-render'
+import { deleteEmptyProp, PartialExcept, PickAndFlatten, RecursivePartial } from './utils'
 
 export interface Config {
   input: {
@@ -76,10 +71,6 @@ export const defaultConfig = () => ({
   debug: true
 } as Config)
 
-export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
-
-export type PickAndFlatten<T, K extends keyof T> = UnionToIntersection<T[K]>
-
 /**
  * Merge config objects.
  */
@@ -104,14 +95,6 @@ export const readConfig = (): Config => {
 export type CliArgs =
   PickAndFlatten<Config, ConfigSerializableObjectField> &
   Pick<Config, 'debug'>
-
-const deleteEmptyProp = (obj: any) => {
-  for (const propName in obj)
-    if (obj[propName] === null || obj[propName] === undefined)
-      delete obj[propName]
-    else if (typeof obj[propName] === 'object')
-      deleteEmptyProp(obj[propName])
-}
 
 export const mergeCliArgs = (config: Config, cliArgs: CliArgs) => {
   const _config: PartialExcept<Config, ConfigSerializableObjectField> = {
