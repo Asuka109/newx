@@ -12,8 +12,8 @@
     "newx": "dist/cli.js"
   },
   "scripts": {
-    "build": "microbundle",
-    "dev": "microbundle watch"
+    "build": "microbundle src/index.ts src/cli.ts --format cjs --target node",
+    "dev": "microbundle watch src/index.ts src/cli.ts --format cjs --target node"
   },
   "dependencies": {
     "cac": "^6.7.1",
