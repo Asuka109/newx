@@ -28,7 +28,7 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
   })
   const process = (inputFile: string, outputFile: string) => {
     newx.processFile(inputFile, outputFile)
-    logger.log(chalk.cyan('Wrote'), path.relative(options.input.pages, inputFile))
+    logger.done('Wrote', path.relative(options.input.pages, inputFile))
   }
   const processAll = () => {
     pageFiles.forEach(inputFile => {
@@ -59,7 +59,7 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
       if (pageFiles.includes(abspath)) {
         process(abspath, getOutputPagePath(abspath))
       } else {
-        logger.log('Dependencies changed, rebuild all pages.')
+        logger.warn('Dependencies changed, rebuild all pages.')
         processAll()
       }
     }, 50))
