@@ -7,6 +7,7 @@ import Newx from './index'
 import rimraf from "rimraf";
 import logger from './logger'
 import chalk from 'chalk'
+import debounce from 'lodash/debounce'
 
 const cli = cac('newx')
 
@@ -51,19 +52,15 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
     pages, components, layouts, ..._watch instanceof Array ? _watch : [_watch]
   ])
   watchFiles.forEach(watchFile => {
-    fs.watch(watchFile, (event, filename) => {
+    fs.watch(watchFile, debounce((event, filename) => {
       const abspath = path.resolve(watchFile, filename)
-      console.log('abspath: ', abspath)
       if (pageFiles.includes(abspath)) {
         process(abspath, getOutputPagePath(abspath))
       } else {
         logger.log('Dependencies changed, rebuild all pages.')
-        pageFiles.forEach(inputFile => {
-          const outputFile = getOutputPagePath(inputFile)
-          newx.processFile(inputFile, outputFile)
-        })
+        processAll()
       }
-    })
+    }, 50))
   })
 }
 
