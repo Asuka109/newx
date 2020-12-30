@@ -24,9 +24,12 @@ interface NewxOptions {
     debug: boolean
 }
 
-const postHtmlNestedModules: typeof postHtmlModules = ({ plugins=[], ...options} = {}) => {
-  const hookedPostHtmlModules = (tree: postHtml.Node) => postHtmlNestedModules({ plugins, ...options })(tree)
+const postHtmlNestedModules: typeof postHtmlModules = ({ plugins=[], ...options } = {}) => {
   const _plugins = plugins instanceof Array ? plugins : [plugins]
+  const hookedPostHtmlModules = (tree: postHtml.Node) => postHtmlNestedModules({
+    plugins: _plugins,
+    ...options
+  })(tree)
   return postHtmlModules({
     plugins: [hookedPostHtmlModules, ..._plugins],
     ...options
@@ -42,8 +45,15 @@ export default class Newx {
   constructor(options: NewxOptions) {
     this.options = options
     this.processor = postHtml([
-      postHtmlExtend({ root: 'src/layouts' }),
-      postHtmlNestedModules({ root: 'src/components' })
+      postHtmlExtend({
+        root: 'src/layouts'
+      }),
+      postHtmlNestedModules({
+        root: 'src/components',
+        tag: 'import',
+        attribute: 'from',
+        from: `${options.components}/__` 
+      })
     ])
     this.parser = (content: string) => postHtmlParser(content, options?.parser)
     this.render = (tree: postHtmlRender.Tree) => postHtmlRender(tree, options?.render)
