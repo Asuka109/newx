@@ -15,10 +15,8 @@ interface NewxOptions {
     layouts: string
     /** Specify the output format. */
     format: boolean
-}
-
-interface ProcessOptions {
-  parser?: postHtmlParser.Options
+    parser?: postHtmlParser.Options
+    render?: Partial<postHtmlRender.Options>
 }
 
 const postHtmlNestedModules: typeof postHtmlModules = ({ plugins=[], ...options} = {}) => {
@@ -33,6 +31,8 @@ const postHtmlNestedModules: typeof postHtmlModules = ({ plugins=[], ...options}
 export default class Newx {
   options: NewxOptions
   processor: postHtml.PostHTML<unknown, unknown>
+  parser: (content: string) => postHtmlParser.Tree
+  render: (tree: postHtmlRender.Tree) => string
 
   constructor(options: NewxOptions) {
     this.options = options
@@ -40,20 +40,25 @@ export default class Newx {
       postHtmlExtend({ root: 'src/layouts' }),
       postHtmlNestedModules({ root: 'src/components' })
     ])
+    this.parser = (content: string) => postHtmlParser(content, options?.parser)
+    this.render = (tree: postHtmlRender.Tree) => postHtmlRender(tree, options?.render)
   }
 
-  async process(html: string, options?: ProcessOptions) {
-    const parser = (html: string) => postHtmlParser(html, options?.parser)
-    const result = await this.processor.process(html, { parser })
+  async process(html: string) {
+    const result = await this.processor.process(html, {
+      parser: this.parser,
+      render: this.render,
+      sync: false
+    })
     return result.html
   }
 
-  async processFile(inputFile: string, outputFile: string, options?: ProcessOptions) {
+  async processFile(inputFile: string, outputFile: string) {
     try {
       const outputDir = path.dirname(outputFile)
       fs.mkdirSync(outputDir, { recursive: true })
       const inputContent = await fs.promises.readFile(inputFile, { encoding: 'utf-8' })
-      let outputContent = await this.process(inputContent, options)
+      let outputContent = await this.process(inputContent)
       if (this.options.format)
         outputContent = beautify.html(outputContent, { preserve_newlines: false })
         await fs.promises.writeFile(outputFile, outputContent)
