@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "cac": "^6.7.1",
+    "chalk": "^4.1.0",
     "deepmerge": "^4.2.2",
     "glob": "^7.1.6",
     "js-beautify": "^1.13.0",
