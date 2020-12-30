@@ -1,5 +1,4 @@
 import fs from "fs"
-import { promisify } from "util"
 import postHtml from 'posthtml'
 import postHtmlExtend from 'posthtml-extend'
 import postHtmlParser from 'posthtml-parser'

@@ -2,9 +2,11 @@ import { cac } from 'cac'
 import fs from 'fs'
 import glob from "glob"
 import path from 'path'
-import { CliArgs, Config, mergeCliArgs, readConfig } from './config'
+import { CliArgs, mergeCliArgs, readConfig } from './config'
 import Newx from './index'
 import rimraf from "rimraf";
+import logger from './logger'
+import chalk from 'chalk'
 
 const cli = cac('newx')
 
@@ -26,20 +28,25 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
     parser: options.parser,
     render: options.render
   })
+  const process = (inputFile: string, outputFile: string) => {
+    newx.processFile(inputFile, outputFile)
+    logger.log(chalk.cyan('Wrote'), path.relative(pages, inputFile))
+  }
+  const processAll = () => {
+    pageFiles.forEach(inputFile => {
+      const outputFile = getOutputPagePath(inputFile)
+      process(inputFile, outputFile)
+    })
+  }
   if (options.output.clean)
     rimraf.sync(options.output.dir)
 
   // Build all pages.
   const pageFiles = glob.sync(`${pages}/**/*.html`).map(filename => path.resolve(filename))
-
-  console.log('pageFiles: ', pageFiles);
-  pageFiles.forEach(inputFile => {
-    const outputFile = getOutputPagePath(inputFile)
-    newx.processFile(inputFile, outputFile)
-  })
+  processAll()
   if (!watch) return
 
-  // Watch dependent files and recompile them when they are modified.
+  // Watch dependent files and recompile them when they are changed.
   const watchFiles = removeDuplicate([
     pages, components, layouts, ..._watch instanceof Array ? _watch : [_watch]
   ])
@@ -48,8 +55,9 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
       const abspath = path.resolve(watchFile, filename)
       console.log('abspath: ', abspath)
       if (pageFiles.includes(abspath)) {
-        newx.processFile(abspath, getOutputPagePath(abspath))
+        process(abspath, getOutputPagePath(abspath))
       } else {
+        logger.log('Dependencies changed, rebuild all pages.')
         pageFiles.forEach(inputFile => {
           const outputFile = getOutputPagePath(inputFile)
           newx.processFile(inputFile, outputFile)
