@@ -14,8 +14,12 @@ interface NewxOptions {
     layouts: string
     /** Specify the output format. */
     format: boolean
+    /** Options for posthtml-parser. */
     parser?: postHtmlParser.Options
+    /** Options for posthtml-render. */
     render?: Partial<postHtmlRender.Options>
+    /** Debug mode. */
+    debug: boolean
 }
 
 const postHtmlNestedModules: typeof postHtmlModules = ({ plugins=[], ...options} = {}) => {

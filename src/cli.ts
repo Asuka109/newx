@@ -15,6 +15,8 @@ const removeDuplicate = <T = any>(arr: T[]) => Array.from(new Set(arr))
 
 const cliAction = (cliOptions: CliArgs, watch: boolean) => {
   const options = mergeCliArgs(readConfig(), cliOptions)
+  console.log('options: ', options);
+  logger.setOptions({ debug: options.debug })
   const {
     input: { components, layouts, pages },
     devServer: { watch: _watch }
@@ -27,7 +29,8 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
     ...options.input,
     format: options.output.format,
     parser: options.parser,
-    render: options.render
+    render: options.render,
+    debug: options.debug
   })
   const process = (inputFile: string, outputFile: string) => {
     newx.processFile(inputFile, outputFile)
@@ -81,6 +84,7 @@ cli
   .option('-c, --clean', 'Clean output directory before building.')
   .option('-f, --format', 'Specify the output format.')
   .option('-w, --watch <path>', 'Observed path whose change triggers recompilation.')
+  .option('-d, --debug', 'Enable debug mode.')
 
 cli.help()
 

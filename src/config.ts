@@ -46,9 +46,11 @@ export interface Config {
   parser: Partial<postHtmlParser.Options>
   /** Options for posthtml-render. */
   render: Partial<postHtmlRender.Options>
+  /** Debug mode. */
+  debug: boolean
 }
 
-export type ConfigSerializableField = 'input'|'output'|'devServer'
+export type ConfigSerializableObjectField = 'input'|'output'|'devServer'
 
 export const defaultConfig = () => ({
   input: {
@@ -70,7 +72,8 @@ export const defaultConfig = () => ({
   plugins: [],
   jsBeautify: {},
   parser: {},
-  render: {}
+  render: {},
+  debug: true
 } as Config)
 
 export type UnionToIntersection<U> = (U extends any ? (k: U) => void : never) extends ((k: infer I) => void) ? I : never
@@ -98,7 +101,9 @@ export const readConfig = (): Config => {
   return mergeConfig(...configContents)
 }
 
-export type CliArgs = PickAndFlatten<Config, ConfigSerializableField>
+export type CliArgs =
+  PickAndFlatten<Config, ConfigSerializableObjectField> &
+  Pick<Config, 'debug'>
 
 const deleteEmptyProp = (obj: any) => {
   for (const propName in obj)
@@ -108,14 +113,25 @@ const deleteEmptyProp = (obj: any) => {
       deleteEmptyProp(obj[propName])
 }
 
-export const mergeCliArgs = (config: Config, CliArgs: CliArgs) => {
-  const {
-    pages, components, layouts, dir, clean, format, host, port, open, watch
-  } = CliArgs
-  const _config: PartialExcept<Config, ConfigSerializableField> = {
-    input: { pages, components, layouts },
-    output: { dir, clean, format },
-    devServer: { host, port, open, watch }
+export const mergeCliArgs = (config: Config, cliArgs: CliArgs) => {
+  const _config: PartialExcept<Config, ConfigSerializableObjectField> = {
+    input: {
+      pages: cliArgs.pages,
+      components: cliArgs.components,
+      layouts: cliArgs.layouts
+    },
+    output: {
+      dir: cliArgs.dir,
+      clean: cliArgs.clean,
+      format: cliArgs.format
+    },
+    devServer: {
+      host: cliArgs.host,
+      port: cliArgs.port,
+      open: cliArgs.open,
+      watch: cliArgs.watch
+    },
+    debug: cliArgs.debug
   }
   deleteEmptyProp(_config)
   return mergeConfig(config, _config)
