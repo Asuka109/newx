@@ -1,19 +1,20 @@
 {
   "name": "newx",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "source": "src/index.ts",
   "main": "dist/newx.js",
-  "umd:main": "dist/newx.umd.js",
-  "module": "dist/newx.module.js",
   "types": "dist/index.d.ts",
   "author": "Asuka109",
   "license": "MIT",
   "bin": {
     "newx": "dist/cli.js"
   },
+  "repository": "Asuka109/Newx.js",
+  "files": ["dist/**.*"],
   "scripts": {
     "build": "microbundle src/index.ts src/cli.ts --format cjs --target node",
-    "dev": "microbundle watch src/index.ts src/cli.ts --format cjs --target node"
+    "dev": "microbundle watch src/index.ts src/cli.ts --format cjs --target node",
+    "prepublish": "rimraf dist && npm run build"
   },
   "dependencies": {
     "cac": "^6.7.1",
