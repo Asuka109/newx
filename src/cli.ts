@@ -5,6 +5,7 @@ import { cac } from 'cac'
 import rimraf from 'rimraf'
 import chalk from 'chalk'
 import debounce from 'lodash/debounce'
+import liveServer from 'live-server'
 import Newx from './index'
 import logger from './logger'
 import { removeDuplicate } from './utils'
@@ -64,6 +65,13 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
       }
     }, 50))
   })
+  // Start live server.
+  liveServer.start({
+    ...options.devServer,
+    root: options.output.dir
+  })
+  const serverHost = options.devServer.host === '0.0.0.0' ? 'localhost' : options.devServer.host
+  logger.log(chalk`✨ The development server runs on {green http://${serverHost}:${options.devServer.port}}.`)
 }
 
 cli.command('build', 'Build files.')

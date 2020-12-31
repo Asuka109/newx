@@ -4,6 +4,7 @@ import merge from 'deepmerge'
 import beautify from 'js-beautify'
 import postHtmlParser from 'posthtml-parser'
 import postHtmlRender from 'posthtml-render'
+import liveServer from 'live-server'
 import { deleteEmptyProp, PartialExcept, PickAndFlatten, RecursivePartial } from './utils'
 
 export interface Config {
@@ -23,13 +24,7 @@ export interface Config {
     /** Specify the output format. */
     format: boolean
   }
-  devServer: {
-    /** Server host. */
-    host: string,
-    /** Server port. */
-    port: string | number
-    /** Open the dev server in your browser when building succeeded. */
-    open: boolean
+  devServer: liveServer.LiveServerParams & {
     /** Observed path whose change triggers recompilation. */
     watch: string | string[]
   }
@@ -59,9 +54,9 @@ export const defaultConfig = () => ({
     format: true
   },
   devServer: {
-    host: '0.0.0.0',
-    port: '4000',
-    open: true,
+    host: process.env.IP || '0.0.0.0',
+    port: 8080,
+    logLevel: 0,
     watch: []
   },
   plugins: [],
