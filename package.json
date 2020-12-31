@@ -1,6 +1,6 @@
 {
   "name": "newx",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "source": "src/index.ts",
   "main": "dist/newx.js",
   "types": "dist/index.d.ts",
@@ -10,7 +10,9 @@
     "newx": "bin.js"
   },
   "repository": "Asuka109/Newx.js",
-  "files": ["dist/**.*"],
+  "files": [
+    "dist/**.*"
+  ],
   "scripts": {
     "build": "microbundle src/index.ts src/cli.ts --format cjs --target node",
     "dev": "microbundle watch src/index.ts src/cli.ts --format cjs --target node",
