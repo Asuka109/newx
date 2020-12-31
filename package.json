@@ -7,7 +7,7 @@
   "author": "Asuka109",
   "license": "MIT",
   "bin": {
-    "newx": "bin.js"
+    "newx": "./bin.js"
   },
   "repository": "Asuka109/Newx.js",
   "files": [
