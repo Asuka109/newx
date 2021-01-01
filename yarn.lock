@@ -2439,6 +2439,11 @@ import-from@^3.0.0:
   dependencies:
     resolve-from "^5.0.0"
 
+in-publish@^2.0.1:
+  version "2.0.1"
+  resolved "https://registry.npm.taobao.org/in-publish/download/in-publish-2.0.1.tgz#948b1a535c8030561cea522f73f78f4be357e00c"
+  integrity sha1-lIsaU1yAMFYc6lIvc/ePS+NX4Aw=
+
 indexes-of@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npm.taobao.org/indexes-of/download/indexes-of-1.0.1.tgz#f30f716c8e2bd346c7b67d3df3915566a7c05607"

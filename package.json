@@ -17,7 +17,7 @@
   "scripts": {
     "build": "microbundle src/index.ts src/cli.ts --format cjs --target node",
     "dev": "microbundle watch src/index.ts src/cli.ts --format cjs --target node",
-    "prepublish": "rimraf dist && npm run build"
+    "prepublish": "not-in-install && rimraf dist && npm run build || in-install"
   },
   "dependencies": {
     "cac": "^6.7.1",
@@ -41,6 +41,7 @@
     "@types/lodash": "^4.14.166",
     "@types/node": "^14.14.16",
     "@types/rimraf": "^3.0.0",
+    "in-publish": "^2.0.1",
     "microbundle": "^0.13.0"
   }
 }
