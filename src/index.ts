@@ -46,10 +46,10 @@ export default class Newx {
     this.options = options
     this.processor = postHtml([
       postHtmlExtend({
-        root: 'src/layouts'
+        root: options.layouts
       }),
       postHtmlNestedModules({
-        root: 'src/components',
+        root: options.components,
         tag: 'import',
         attribute: 'from',
         from: `${options.components}/__` 
