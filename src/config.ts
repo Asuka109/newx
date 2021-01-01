@@ -23,11 +23,10 @@ export interface Config {
     clean: boolean
     /** Specify the output format. */
     format: boolean
-  }
-  devServer: liveServer.LiveServerParams & {
     /** Observed path whose change triggers recompilation. */
     watch: string | string[]
   }
+  devServer: liveServer.LiveServerParams
   /** Plugins for postHtml. */
   plugins: postHtml.Plugin<unknown>[]
   /** Options for js-beautify. */
@@ -51,13 +50,13 @@ export const defaultConfig = () => ({
   output: {
     dir: 'dist',
     clean: true,
-    format: true
+    format: true,
+    watch: []
   },
   devServer: {
     host: process.env.IP || '0.0.0.0',
     port: 8080,
-    logLevel: 0,
-    watch: []
+    logLevel: 0
   },
   plugins: [],
   jsBeautify: {},
@@ -101,13 +100,13 @@ export const mergeCliArgs = (config: Config, cliArgs: CliArgs) => {
     output: {
       dir: cliArgs.dir,
       clean: cliArgs.clean,
-      format: cliArgs.format
+      format: cliArgs.format,
+      watch: cliArgs.watch
     },
     devServer: {
       host: cliArgs.host,
       port: cliArgs.port,
-      open: cliArgs.open,
-      watch: cliArgs.watch
+      open: cliArgs.open
     },
     debug: cliArgs.debug
   }

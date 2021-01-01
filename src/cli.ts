@@ -50,9 +50,9 @@ const cliAction = (cliOptions: CliArgs, watch: boolean) => {
     options.input.pages,
     options.input.components,
     options.input.layouts,
-    ...options.devServer.watch instanceof Array
-      ? options.devServer.watch
-      : [options.devServer.watch]
+    ...options.output.watch instanceof Array
+      ? options.output.watch
+      : [options.output.watch]
   ])
   watchFiles.forEach(watchFile => {
     fs.watch(watchFile, debounce((event, filename) => {
