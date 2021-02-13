@@ -71,6 +71,29 @@ $ newx dev
 ✨ The development server runs on http://localhost:8080.
 ```
 
+Visit the site and you will get:
+
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <div id="app">
+    <div class="info">
+      <span>Newx.js</span>
+    </div>
+    <p>Welcome~~</p>
+  </div>
+</body>
+</html>
+```
+
+Newx can also make static pages load vue components on demand.
+
 ## Usage
 
 > Coming soon...
