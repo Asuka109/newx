@@ -9,7 +9,6 @@
     "dev": "node ../dist/cli.js dev"
   },
   "dependencies": {
-    "newx": "../"
-  },
-  "devDependencies": {}
+    "cosmiconfig": "^7.0.0"
+  }
 }

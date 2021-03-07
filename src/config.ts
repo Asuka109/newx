@@ -6,6 +6,7 @@ import postHtmlParser from 'posthtml-parser'
 import postHtmlRender from 'posthtml-render'
 import liveServer from 'live-server'
 import { deleteEmptyProp, PartialExcept, PickAndFlatten, RecursivePartial } from './utils'
+import { cosmiconfigSync } from 'cosmiconfig'
 
 export interface Config {
   input: {
@@ -30,7 +31,7 @@ export interface Config {
   /** Plugins for postHtml. */
   plugins: postHtml.Plugin<unknown>[]
   /** Options for js-beautify. */
-  jsBeautify: Partial<beautify.JSBeautifyOptions> 
+  jsBeautify: Partial<beautify.JSBeautifyOptions>
   /** Options for posthtml-parser. */
   parser: Partial<postHtmlParser.Options>
   /** Options for posthtml-render. */
@@ -39,7 +40,7 @@ export interface Config {
   debug: boolean
 }
 
-export type ConfigSerializableObjectField = 'input'|'output'|'devServer'
+export type ConfigSerializableObjectField = 'input' | 'output' | 'devServer'
 
 export const defaultConfig = () => ({
   input: {
@@ -75,15 +76,9 @@ const mergeConfig = (...args: RecursivePartial<Config>[]) => merge.all(args) as 
  * or newx property in package.json from your project. 
  */
 export const readConfig = (): Config => {
-  const configContents: RecursivePartial<Config>[] = [defaultConfig()];
-  ['newx.config.ts', 'newx.config.js', '.newxrc.json', '.newxrc'].forEach(filename => {
-    try {
-      if (statSync(filename).isFile()) {
-        configContents.push(require(`${process.cwd()}/${filename}`))
-      }
-    } catch (e) {}
-  })
-  return mergeConfig(...configContents)
+  const explorerSync = cosmiconfigSync('newx')
+  const result = explorerSync.search()
+  return mergeConfig(defaultConfig(), result?.config)
 }
 
 export type CliArgs =
